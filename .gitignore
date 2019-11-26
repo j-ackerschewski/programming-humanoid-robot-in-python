@@ -53,3 +53,5 @@ docs/_build/
 # PyBuilder
 target/
 .ipynb_checkpoints
+
+simspark-spl-win32_v0.7.2
