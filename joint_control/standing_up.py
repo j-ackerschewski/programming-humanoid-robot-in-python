@@ -20,7 +20,6 @@ class StandingUpAgent(PostureRecognitionAgent):
 
         # The robot plays the animation, but can't actually stand up using that.
         # I expect that the interpolation is at fault for that.
-        print posture
         if posture == 'Belly':
             self.keyframes = rightBellyToStand()
         if posture == 'Back':
