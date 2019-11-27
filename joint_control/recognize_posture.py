@@ -42,7 +42,7 @@ class PostureRecognitionAgent(AngleInterpolationAgent):
         # predict
         self.posture = self.posture_classifier[clf.predict([data])[0]]
         # The result seems pretty satisfying
-        return posture
+        return self.posture
 
 if __name__ == '__main__':
     agent = PostureRecognitionAgent()

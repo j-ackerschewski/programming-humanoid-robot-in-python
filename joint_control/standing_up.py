@@ -7,16 +7,27 @@
 
 
 from recognize_posture import PostureRecognitionAgent
-
+from keyframes import hello, leftBackToStand, leftBellyToStand, rightBellyToStand, rightBackToStand
 
 class StandingUpAgent(PostureRecognitionAgent):
     def think(self, perception):
-        self.standing_up()
+        self.standing_up(perception)
         return super(StandingUpAgent, self).think(perception)
 
-    def standing_up(self):
+    def standing_up(self, perception):
         posture = self.posture
         # YOUR CODE HERE
+
+        # The robot plays the animation, but can't actually stand up using that.
+        # I expect that the interpolation is at fault for that.
+        print posture
+        if posture == 'Belly':
+            self.keyframes = rightBellyToStand()
+        if posture == 'Back':
+            self.keyframes = rightBackToStand()
+        if posture == 'Standing':
+            self.keyframes = hello()
+
 
 
 class TestStandingUpAgent(StandingUpAgent):
