@@ -18,6 +18,7 @@
 # add PYTHONPATH
 import os
 import sys
+import numpy as np
 sys.path.append(os.path.join(os.path.abspath(os.path.dirname(__file__)), '..', 'joint_control'))
 
 from numpy.matlib import matrix, identity
@@ -35,9 +36,37 @@ class ForwardKinematicsAgent(AngleInterpolationAgent):
         self.transforms = {n: identity(4) for n in self.joint_names}
 
         # chains defines the name of chain and joints of the chain
-        self.chains = {'Head': ['HeadYaw', 'HeadPitch']
-                       # YOUR CODE HERE
+        self.chains = {'Head': ['HeadYaw', 'HeadPitch'],
+                       'LArm': ['LShoulderPitch', 'LShoulderRoll', 'LElbowYaw', 'LElbowRoll'], # LWristYaw and RWristYaw do not exist?
+                       'LLeg': ['LHipYawPitch', 'LHipRoll', 'LHipPitch', 'LKneePitch', 'LAnklePitch', 'LAnkleRoll'],
+                       'RLeg': ['RHipYawPitch', 'RHipRoll', 'RHipPitch', 'RKneePitch', 'RAnklePitch', 'RAnkleRoll'],
+                       'RArm': ['RShoulderPitch', 'RShoulderRoll', 'RElbowYaw', 'RElbowRoll']
                        }
+        self.lengths = {'HeadYaw': [0, 0, 126.5],
+                        'HeadPitch': [0, 0, 0],
+                        'LShoulderPitch': [0, 98, 100],
+                        'LShoulderRoll': [0, 0, 0],
+                        'LElbowYaw': [105, 15, 0],
+                        'LElbowRoll': [0, 0, 0],
+                        'LWristYaw': [55.95, 0, 0],
+                        'LHipYawPitch': [0, 50, -85],
+                        'LHipRoll': [0, 0, 0],
+                        'LHipPitch': [0, 0, 0],
+                        'LKneePitch': [0, 0, -100],
+                        'LAnklePitch': [0, 0, -102.9],
+                        'LAnkleRoll': [0, 0, 0],
+                        'RShoulderPitch': [0, -98, 100],
+                        'RShoulderRoll': [0, 0, 0],
+                        'RElbowYaw': [105, -15, 0],
+                        'RElbowRoll': [0, 0, 0],
+                        'RWristYaw': [55.95, 0, 0],
+                        'RHipYawPitch': [0, -50, -85],
+                        'RHipRoll': [0, 0, 0],
+                        'RHipPitch': [0, 0, 0],
+                        'RKneePitch': [0, 0, -100],
+                        'RAnklePitch': [0, 0, -102.9],
+                        'RAnkleRoll': [0, 0, 0]
+                        }
 
     def think(self, perception):
         self.forward_kinematics(perception.joint)
@@ -51,8 +80,41 @@ class ForwardKinematicsAgent(AngleInterpolationAgent):
         :return: transformation
         :rtype: 4x4 matrix
         '''
-        T = identity(4)
+        T = np.identity(4)
         # YOUR CODE HERE
+        sin = np.sin(joint_angle)
+        cos = np.cos(joint_angle)
+
+        # create rotation matricies
+        Rx = np.array([[1, 0,    0,   0],
+                       [0, cos, -sin, 0],
+                       [0, sin,  cos, 0],
+                       [0, 0,    0,   1]])
+
+        Ry = np.array([[ cos, 0, sin, 0],
+                       [ 0,   1, 0,   0],
+                       [-sin, 0, cos, 0],
+                       [ 0,   0, 0,   1]])
+
+        Rz = np.array([[ cos, sin, 0, 0],
+                       [-sin, cos, 0, 0],
+                       [ 0,   0,   1, 0],
+                       [ 0,   0,   0, 1]])
+
+        # add rotation by name. Note that the HipYawPitch joints gain both rotations (since they are at 45 angle)
+        if 'Roll' in joint_name:
+            T = np.dot(T, Rx)
+
+        if 'Pitch' in joint_name:
+            T = np.dot(T, Ry)
+
+        if 'Yaw' in joint_name:
+            T = np.dot(T, Rz)
+
+        # add length to matrix
+        T[3][0] = self.lengths[joint_name][0]
+        T[3][1] = self.lengths[joint_name][1]
+        T[3][2] = self.lengths[joint_name][2]
 
         return T
 
@@ -67,7 +129,8 @@ class ForwardKinematicsAgent(AngleInterpolationAgent):
                 angle = joints[joint]
                 Tl = self.local_trans(joint, angle)
                 # YOUR CODE HERE
-
+                # just multiply current matrix to total
+                T = np.dot(T, Tl)
                 self.transforms[joint] = T
 
 if __name__ == '__main__':
