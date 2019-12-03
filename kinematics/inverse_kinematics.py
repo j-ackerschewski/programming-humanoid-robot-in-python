@@ -45,7 +45,7 @@ class InverseKinematicsAgent(ForwardKinematicsAgent):
             T = np.array([self.from_trans(x) for x in Ts]).T
             J = Te - T
             dT = Te - T
-            J[0, :] = -dT[1, :]
+            J[0, :] = -dT[1, :]  # is this here right?
             J[1, :] = dT[0, :]
             J[-1, :] = 1
             d_theta = lambda_ * np.dot(pinv(J), e)
