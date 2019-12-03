@@ -112,9 +112,9 @@ class ForwardKinematicsAgent(AngleInterpolationAgent):
             T = np.dot(T, Rz)
 
         # add length to matrix
-        T[3][0] = self.lengths[joint_name][0]
-        T[3][1] = self.lengths[joint_name][1]
-        T[3][2] = self.lengths[joint_name][2]
+        T[-1][0] = self.lengths[joint_name][0]
+        T[-1][1] = self.lengths[joint_name][1]
+        T[-1][2] = self.lengths[joint_name][2]
 
         return T
 
