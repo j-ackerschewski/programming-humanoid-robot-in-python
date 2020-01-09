@@ -58,8 +58,9 @@ class PIDController(object):
         # current e(tk)
         e0 = target - sensor
 
-        self.y.append(self.u)
+        self.y.appendleft(self.u)
         for x in range(self.y.maxlen):
+
             # calculate u(tk) for each value in delay queue
             self.y.append(self.y.popleft() + \
              (self.Kp + (self.Ki * self.dt) + self.Kd / self.dt) * e0 - \
